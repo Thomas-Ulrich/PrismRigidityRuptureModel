@@ -3,7 +3,7 @@ components:
   - !GroupFilter
     groups: 2
     components: !ASAGI
-      file: netcdf/Tohoku_lower.nc
+      file: netcdf/lower.nc
       parameters: [rho, mu, lambda]
       var: data
   - !GroupFilter
