@@ -9,7 +9,7 @@
         x1: 0
         y1: 0
       components: !ASAGI
-          file: bati.meters.nc
+          file: netcdf/bati.meters.nc
           parameters: [z_sea_floor]
           var: z
     z: !AffineMap
