@@ -1,0 +1,55 @@
+!EvalModel
+parameters: [lithostaticStress, b_xx, b_yy, b_xy, b_yz, b_xz, Omega]
+model: !Switch
+  [lithostaticStress]: !Include lithostaticStress.yaml
+  [b_xx, b_yy, b_zz, b_xy, b_yz, b_xz]: !EvalModel
+    parameters: [strike, R]
+    model: !Switch
+      [strike]: !ConstantMap
+          map:
+            strike: 0
+      [R]: !EvalModel
+          parameters: [z_below_sea_floor]
+          model: !Switch
+            z_below_sea_floor: !Include z_below_sea_floor.yaml
+          components: !LayeredModel
+            map: !AffineMap
+              matrix:
+                z1: [1.0]
+              translation:
+                z1: 0
+            interpolation: linear
+            parameters: [R]
+            nodes:
+              0: [0.6]
+              -3e3: [0.6]
+              -8e3: [0.6]
+              -10e9: [0.6]
+    components: !STRESS_STR_DIP_SLIP_AM
+      constants:
+        mu_d:     0.05
+        mu_s:     0.2
+        dip:      9.0
+        s_zz:     15e6
+        cohesion: 0
+        DipSlipFaulting:  1.0
+        s2ratio:  0.5
+  [Omega]: !FunctionMap
+    map:
+      Omega: |
+        z_tappering = -25000.0;
+        if (z < z_tappering) {
+          Rz = (-z+z_tappering) / 10000.0;
+          Omega = max(0.0, min(1.0, 1.0-Rz));
+        } else {
+        Omega= 1.0;
+        }
+        return Omega;
+components: !FunctionMap
+  map:
+    s_zz:     return lithostaticStress;
+    s_xx:     return (Omega*b_xx+ (1.0-Omega))*lithostaticStress;
+    s_yy:     return (Omega*b_yy+ (1.0-Omega))*lithostaticStress;
+    s_xy:     return Omega*b_xy*lithostaticStress;
+    s_yz:     return Omega*b_yz*lithostaticStress;
+    s_xz:     return Omega*b_xz*lithostaticStress;

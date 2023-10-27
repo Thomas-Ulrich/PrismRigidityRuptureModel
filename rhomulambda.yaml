@@ -1,0 +1,14 @@
+!Any
+components:
+  - !GroupFilter
+    groups: 2
+    components: !ASAGI
+      file: Tohoku_lower.nc
+      parameters: [rho, mu, lambda]
+      var: data
+  - !GroupFilter
+    groups: 1
+    components: !ASAGI
+      file: Sumatra_upper.nc
+      parameters: [rho, mu, lambda]
+      var: data

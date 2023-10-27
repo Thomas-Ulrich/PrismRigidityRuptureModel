@@ -1,0 +1,17 @@
+!Switch
+[lithostaticStress]: !EvalModel
+  parameters: [z_below_sea_floor]
+  model: !Switch
+    z_below_sea_floor: !Include z_below_sea_floor.yaml
+  components: !LayeredModel
+    map: !AffineMap
+      matrix:
+        z1: [1.0]
+      translation:
+        z1: 0
+    interpolation: linear
+    parameters: [lithostaticStress]
+    nodes:
+      0: [-3e6]
+      -20e3: [-30e6]
+      -10e9: [-30e6]

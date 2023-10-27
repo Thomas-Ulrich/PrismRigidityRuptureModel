@@ -1,0 +1,32 @@
+!Switch
+[rho, mu, lambda]: !Include rhomulambda.yaml
+[s_xx, s_yy, s_zz, s_xy, s_yz, s_xz]: !Include initial_stress.yaml
+[plastCo, bulkFriction]: !EvalModel
+    parameters: [x,y,z,mu]
+    model: !Switch
+      [mu]: !Include rhomulambda.yaml
+      [x,y,z]: !AffineMap
+        matrix:
+          x: [1.0, 0.0, 0.0]
+          y: [0.0, 1.0, 0.0]
+          z: [0.0, 0.0, 1.0]
+        translation:
+          x: 0
+          y: 0
+          z: 0
+    components: !Switch
+      [bulkFriction, plastCo]: !LayeredModel
+        map: !AffineMap
+          matrix:
+            mu0: [1.0, 0.0, 0.0, 0.0]
+          translation:
+            mu0: 0
+        interpolation: linear
+        parameters: [bulkFriction, plastCo]
+        nodes:
+           0:    [0.15, 1.0e6]
+           1e9:  [0.15, 1.0e6]
+           2.5e9:  [0.3, 2e6]
+           10e9:  [0.4, 4e6]
+           30e9: [0.6, 20e6]
+           1e20: [0.6, 20e6]

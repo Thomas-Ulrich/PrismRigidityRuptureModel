@@ -1,0 +1,23 @@
+!EvalModel
+  parameters: [z, z_sea_floor]
+  model: !Switch
+    z_sea_floor: !AffineMap
+      matrix:
+        x1: [1.0, 0.0, 0.0]
+        y1: [0.0, 1.0, 0.0]
+      translation:
+        x1: 0
+        y1: 0
+      components: !ASAGI
+          file: bati.meters.nc
+          parameters: [z_sea_floor]
+          var: z
+    z: !AffineMap
+      matrix:
+        z: [0.0, 0.0, 1.0]
+      translation:
+        z: 0
+  components: !FunctionMap
+      map:
+       z_below_sea_floor:
+         return z - z_sea_floor; 

@@ -1,0 +1,51 @@
+!Switch
+[s_xx, s_yy, s_zz, s_xy, s_yz, s_xz]: !Include initial_stress.yaml
+[rs_a]: !LayeredModel
+  map: !AffineMap
+    matrix:
+      z0: [0.0, 0.0, 1.0]
+    translation:
+      z0: 0
+  interpolation: linear
+  parameters: [rs_a]
+  nodes:
+     10e10:    [0.015]
+     -10000:  [0.015]
+     -15000: [0.01]
+     -25000: [0.01]
+     -30000: [0.015]
+     -10e10:   [0.015]
+[rs_sl0]: !ConstantMap
+  map:
+    rs_sl0: 0.5
+[rs_srW]: !LayeredModel
+      map: !AffineMap
+        matrix:
+          x0: [0.0, 1.0, 0.0]
+        translation:
+          x0: 0
+      interpolation: linear
+      parameters: [rs_srW]
+      nodes:
+         -10e10:    [10.0]
+         000.0:  [10.0]
+         2000.0: [0.1]
+         98000:   [0.1]
+         100000:   [10.0]
+         10e10:    [10.0]
+[Tnuc_n, Tnuc_s]: !ConstantMap
+    map:
+        Tnuc_n: 0
+        Tnuc_s: 0
+[Tnuc_d]: !FunctionMap
+  map:
+   Tnuc_d: |
+      xh = 100000.;
+      yh = 50000.;
+      zh = -20000.;
+      r = sqrt(pow(x-xh,2.0) + pow(y-yh,2.0) + pow(z-zh,2));
+      r_crit = 12000.0;
+      if (r <= r_crit) {
+        return 25000000.0*exp(pow(r,2.0)/(pow(r,2.0)-pow(r_crit,2.0)));
+      }
+      return 0.0;
