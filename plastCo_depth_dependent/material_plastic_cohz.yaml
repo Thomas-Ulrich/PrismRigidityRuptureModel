@@ -1,0 +1,47 @@
+!Switch
+[rho, mu, lambda]: !Include rhomulambda.yaml
+[plastCo]: !EvalModel
+    parameters: [z_below_sea_floor]
+    model: !Switch
+      z_below_sea_floor: !Include z_below_sea_floor.yaml
+    components: !LayeredModel
+      map: !AffineMap
+        matrix:
+          z1: [1.0]
+        translation:
+          z1: 0
+      interpolation: linear
+      parameters: [plastCo]
+      nodes:
+        0: [1.0e6]
+        -10e3: [10e6]
+        -70e9: [70e6]
+[s_xx, s_yy, s_zz, s_xy, s_yz, s_xz]: !Include initial_stress.yaml
+[bulkFriction]: !EvalModel
+    parameters: [x,y,z,mu]
+    model: !Switch
+      [mu]: !Include rhomulambda.yaml
+      [x,y,z]: !AffineMap
+        matrix:
+          x: [1.0, 0.0, 0.0]
+          y: [0.0, 1.0, 0.0]
+          z: [0.0, 0.0, 1.0]
+        translation:
+          x: 0
+          y: 0
+          z: 0
+    components: !Switch
+      [bulkFriction]: !LayeredModel
+        map: !AffineMap
+          matrix:
+            mu0: [1.0, 0.0, 0.0, 0.0]
+          translation:
+            mu0: 0
+        interpolation: linear
+        parameters: [bulkFriction]
+        nodes:
+           0:    [0.15]
+           1e9:  [0.15]
+           2.5e9:  [0.3]
+           30e9: [0.6]
+           1e20: [0.6]

@@ -1,0 +1,30 @@
+!Switch
+[yieldStress, secInv, stress_excess_plasticity, CF,mu]: !EvalModel
+    parameters: [s_xx, s_yy, s_zz, s_xy, s_yz, s_xz, plastCo, bulkFriction, mu]
+    model: !Switch
+      #[s_xx, s_yy, s_zz, s_xy, s_yz, s_xz]: !Include initial_stress.yaml
+      [plastCo, bulkFriction, s_xx, s_yy, s_zz, s_xy, s_yz, s_xz, mu]: !Include material_plastic_mu_dependent.yaml
+    components: !LuaMap
+      returns: [yieldStress, secInv, stress_excess_plasticity, CF,mu]
+      function: |
+          function f (x)
+            meanstress = (x["s_xx"] + x["s_yy"] + x["s_zz"])/3.;
+            sxx = x["s_xx"] -meanstress;
+            syy = x["s_yy"] -meanstress;
+            szz = x["s_zz"] -meanstress;
+            sxy = x["s_xy"];
+            sxz = x["s_xz"];
+            syz = x["s_yz"];
+            secInv = math.sqrt(0.5 * (sxx^2 + syy^2 + szz^2) + sxy^2 + sxz^2 + syz^2);        
+            angfric = math.atan(x["bulkFriction"]);
+            yieldStress = x["plastCo"] * math.cos(angfric) - meanstress * math.sin(angfric);
+            mu = x["mu"];
+            return {
+              yieldStress = yieldStress,
+              secInv = secInv,
+              stress_excess_plasticity = yieldStress-secInv,
+              CF = secInv/yieldStress,
+              mu = mu,
+            }
+          end
+
